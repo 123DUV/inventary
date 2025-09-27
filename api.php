@@ -3,12 +3,13 @@
 // Configurar cabeceras para JSON
 header("Content-Type: application/json; charset=UTF-8");
 
-$host = 'localhost';
-$user = 'root';
-$password = '';
-$dbname = 'inventario';
+$host = 'inventary-inventary123.g.aivencloud.com';
+$port = 26648;
+$user = 'avnadmin';
+$password = 'AVNS_CNL0lePX6ka-BWBNmS5';
+$dbname = 'defaultdb';
 
-$conn = new mysqli($host, $user, $password, $dbname);
+$conn = new mysqli($host, $user, $password, $dbname, $port);
 
 if ($conn->connect_error) {
     die("Conexión fallida: " . $conn->connect_error);
