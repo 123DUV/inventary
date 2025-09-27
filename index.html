@@ -1,0 +1,167 @@
+<!DOCTYPE html >
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Inventario</title>
+    <!--boostrap-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="row mt-3 justify-content-center align-items-center">
+            <input id="search" class="form-control d-none mb-2 mt-2 w-75" type="search" placeholder="Escribe para buscar..." />
+
+        </div>
+        <div class="row d-flex justify-content-center align-items-center">
+            <button class="btn btn-success mt-1 w-50" onclick="showRegister()">Crear registro</button>
+            <button class="btn btn-primary mt-1 mx-1 w-25" onclick="toggleSearch()"><i class="bi bi-search"></i></button>
+
+        </div>
+        <div class="row d-none mt-2" id="registers">
+            <div class="col-12 col-md-12 justify-content-center align-items-center d-flex flex-column">
+                <input class="form-control mt-1" type="text" name="name" id="name" value placeholder="Nombre producto" />
+                <input class="form-control mt-1" type="text" name="amount" id="amount" value placeholder="Cantidad" />
+                <input class="form-control mt-1" type="text" name="price" id="price" value placeholder="Precio" />
+                <button type="button" id="send" class="btn btn-success mt-2 w-50 mb-2">Agregar</button>
+
+            </div>
+        </div>
+        <div class="row mt-1">
+            <div class="table-responsive shadow rounded">
+                <table class="table table-striped table-hover align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                        </tr>
+                    </thead>
+                    <tbody id="info">
+
+                    </tbody>
+                </table>
+                <div id="add">
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+        //array q almacena los datos
+        let allData = []
+            // Cargar datos al iniciar la página
+        document.addEventListener('DOMContentLoaded', loadData);
+
+        const botonSend = document.getElementById('send');
+        // Obtener datos de la API y mostrarlos en la tabla
+        function loadData() {
+            fetch('./api.php?action=list')
+                .then(response => response.json())
+                .then(data => {
+                    allData = data; // guardamos los datos originales
+                    renderRows(allData);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function renderRows(rows) {
+            const info = document.getElementById('info');
+            info.innerHTML = '';
+            rows.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.name}</td>
+          <td>${item.amount}</td>
+          <td>${item.price}</td>
+        `;
+                info.appendChild(row);
+            });
+        }
+        // Evento click del boton guardar
+
+        botonSend.addEventListener('click', function() {
+            const name = document.getElementById('name').value
+            const amount = document.getElementById('amount').value
+            const price = document.getElementById('price').value
+            console.log(name)
+            if (name === '' && name.lenght <= 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Campo vacio',
+                    text: 'Completa todos los campos'
+                })
+            } else if (amount === '' && amount.lenght <= 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Campo vacio',
+                    text: 'Completa todos los campos'
+                })
+            } else if (price === '' && price.lenght <= 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Campo vacio',
+                    text: 'Completa todos los campos'
+                })
+
+            } else {
+                fetch('./api.php?action=save', {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `name=${name}&amount=${amount}&price=${price}`
+                    })
+                    .then(response => {
+                        response.json()
+                    }).then(data => {
+                        loadData()
+                        console.log(data)
+                    }).catch(e => {
+                        console.log(e)
+                    })
+            }
+        })
+
+        function showRegister() {
+            document.getElementById('registers').classList.toggle('d-none');
+        }
+
+        function toggleSearch() {
+            const search = document.getElementById('search');
+            search.classList.toggle('d-none');
+            search.value = '';
+            renderRows(allData); // restablecer tabla al mostrar buscador
+        }
+        document.getElementById('search').addEventListener('input', e => {
+            const q = e.target.value.toLowerCase();
+            const filtered = allData.filter(item =>
+                item.name.toLowerCase().includes(q) ||
+                String(item.amount).includes(q) ||
+                String(item.price).includes(q) ||
+                String(item.id).includes(q)
+            );
+            renderRows(filtered);
+        });
+    </script>
+</body>
+
+</html>
