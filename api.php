@@ -52,6 +52,7 @@ switch ($action) {
         $name = $_POST['name'] ?? '';
         $amount = $_POST['amount'] ?? 0;
         $price = $_POST['price'] ?? 0;
+        $totalPrice = $_POST['totalPrice'] ?? 0;
         
         foreach ($productos as $producto) {
             if (strcasecmp($producto['name'], $name) === 0) {
@@ -61,23 +62,25 @@ switch ($action) {
             }
         }
 
-        $sql = $conn->prepare("INSERT INTO datos (name, amount, price) VALUES (?, ?, ?)");
-        $sql->bind_param("sid", $name, $amount, $price);
+        $sql = $conn->prepare("INSERT INTO datos (name, amount, price, totalPrice) VALUES (?, ?, ?, ?)");
+        $sql->bind_param("sidd", $name, $amount, $price, $totalPrice);
         if ($sql->execute()) {
             echo json_encode([
                 "success" => true,
                 "id" => $sql->insert_id, // ID del nuevo registro
                 "name" => $name,
                 "amount" => $amount,
-                "price" => $price
+                "price" => $price,
+                "totalPrice"=> $totalPrice
             ]);
         } else {
             echo json_encode(["error" => $stmt->error]);
         }
         break;
-        case "sum":
+        case "sumAmount":
             $id = $_POST['id'] ?? 0;
-            $sql = $conn->prepare("UPDATE datos SET amount = amount + 1 WHERE id = ?");
+
+            $sql = $conn->prepare("UPDATE datos SET amount = amount + 1, totalPrice = amount*price WHERE id = ?");
             $sql->bind_param("i", $id);
             if ($sql->execute()) {
                 http_response_code(200);
@@ -87,6 +90,25 @@ switch ($action) {
                 echo json_encode(["error" => $sql->error]);
             }
             break;
+            case "less":
+                $id = $_POST['id'] ?? 0;
+                $sql = $conn->prepare("UPDATE datos SET amount = amount - 1, totalPrice = amount*price WHERE id = ? AND amount > 0");
+                $sql->bind_param("i", $id);
+                if ($sql->execute()) {
+                    if ($sql->affected_rows > 0) {
+                        http_response_code(200);
+                        echo json_encode(["success" => true]);
+                    } else {
+                        http_response_code(400);
+                        echo json_encode(["error" => "No se puede reducir más la cantidad"]);
+                    }
+                } else {
+                    http_response_code(400);
+                    echo json_encode(["error" => $sql->error]);
+                }
+                break;
+                case "sumTotalPrice":
+                    $sql = "SELECT  FROM datos";
     default:
         echo json_encode(["error" => "Acción no válida"]);
         exit;
