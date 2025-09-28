@@ -3,15 +3,15 @@
 // Configurar cabeceras para JSON
 header("Content-Type: application/json; charset=UTF-8");
 
-// $host = 'localhost';
-// $user = 'root';
-// $password = '';
-// $dbname = 'inventario';
+$host = 'localhost';
+$user = 'root';
+$password = '';
+$dbname = 'inventario';
 
-$host = 'sql213.infinityfree.com';
-$user = 'if0_40035413';
-$password = 'pereirasii78';
-$dbname = 'if0_40035413_inventario';
+// $host = 'sql213.infinityfree.com';
+// $user = 'if0_40035413';
+// $password = 'pereirasii78';
+// $dbname = 'if0_40035413_inventario';
 
 $conn = new mysqli($host, $user, $password, $dbname);
 
