@@ -38,9 +38,29 @@ switch ($action) {
         echo json_encode($productos);
         break;
     case 'save':
+         $sql = "SELECT * FROM datos";
+        $result = $conn->query($sql);
+
+        $productos = [];
+        if ($result->num_rows > 0) {
+            $productos = array();
+            while ($row = $result->fetch_assoc()) {
+                $productos[] = $row;
+            }
+        }
+
         $name = $_POST['name'] ?? '';
         $amount = $_POST['amount'] ?? 0;
         $price = $_POST['price'] ?? 0;
+        
+        foreach ($productos as $producto) {
+            if (strcasecmp($producto['name'], $name) === 0) {
+                http_response_code(409); // Conflict
+                echo json_encode(["error" => "El producto ya existe"]);
+                exit;
+            }
+        }
+
         $sql = $conn->prepare("INSERT INTO datos (name, amount, price) VALUES (?, ?, ?)");
         $sql->bind_param("sid", $name, $amount, $price);
         if ($sql->execute()) {
@@ -55,6 +75,18 @@ switch ($action) {
             echo json_encode(["error" => $stmt->error]);
         }
         break;
+        case "sum":
+            $id = $_POST['id'] ?? 0;
+            $sql = $conn->prepare("UPDATE datos SET amount = amount + 1 WHERE id = ?");
+            $sql->bind_param("i", $id);
+            if ($sql->execute()) {
+                http_response_code(200);
+                echo json_encode(["success" => true]);
+            } else {
+                http_response_code(400);
+                echo json_encode(["error" => $sql->error]);
+            }
+            break;
     default:
         echo json_encode(["error" => "Acción no válida"]);
         exit;

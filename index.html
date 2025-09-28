@@ -16,8 +16,6 @@
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
-
 </head>
 
 <body>
@@ -28,15 +26,16 @@
         </div>
         <div class="row d-flex justify-content-center align-items-center">
             <button class="btn btn-success mt-1 w-50" onclick="showRegister()">Crear registro</button>
-            <button class="btn btn-primary mt-1 mx-1 w-25" onclick="toggleSearch()"><i class="bi bi-search"></i></button>
+            <button class="btn btn-primary mt-1 mx-1 w-25" onclick="toggleSearch()"><i
+                        class="bi bi-search"></i></button>
 
         </div>
         <div class="row d-none mt-2" id="registers">
-            <div class="col-12 col-md-12 justify-content-center align-items-center d-flex flex-column">
+            <div class="col-12 col-md-12 rounded mt-2 mb-2 justify-content-center align-items-center d-flex flex-column" style="box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;">
                 <input class="form-control mt-1" type="text" name="name" id="name" value placeholder="Nombre producto" />
                 <input class="form-control mt-1" type="text" name="amount" id="amount" value placeholder="Cantidad" />
                 <input class="form-control mt-1" type="text" name="price" id="price" value placeholder="Precio" />
-                <button type="button" id="send" class="btn btn-success mt-2 w-50 mb-2">Agregar</button>
+                <button type="button" id="send" class="btn btn-success mt-3 w-50 mb-2">Agregar</button>
 
             </div>
         </div>
@@ -48,6 +47,7 @@
                             <th>ID</th>
                             <th>Producto</th>
                             <th>Cantidad</th>
+                            <th></th>
                             <th>Precio</th>
                         </tr>
                     </thead>
@@ -65,12 +65,24 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
+        //llenar select de precios
+        const priceSelect = document.getElementById('price');
+        for (let i = 1000; i <= 100000; i += 1000) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP'
+            }).format(i);
+            priceSelect.appendChild(option);
+        }
         //array q almacena los datos
         let allData = []
             // Cargar datos al iniciar la página
         document.addEventListener('DOMContentLoaded', loadData);
 
         const botonSend = document.getElementById('send');
+
         // Obtener datos de la API y mostrarlos en la tabla
         function loadData() {
             fetch('./api.php?action=list')
@@ -83,45 +95,72 @@
         }
 
         function renderRows(rows) {
+            if (rows.length === 0) {
+                document.getElementById('info').innerHTML = '<tr><td colspan="5">No hay datos disponibles</td></tr>';
+                return;
+            }
+
             const info = document.getElementById('info');
             info.innerHTML = '';
             rows.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-          <td>${item.id}</td>
-          <td>${item.name}</td>
-          <td>${item.amount}</td>
-          <td>${item.price}</td>
-        `;
+                <td>${item.id}</td>
+                <td>${item.name}</td>
+                <td>${item.amount}</td>
+                <td><button class="btn btn-success  mx-1 sumAmount" data-id="${item.id}">+</button></td>
+                <td>${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(item.price)}</td>
+                `;
                 info.appendChild(row);
+            });
+            document.querySelectorAll('.sumAmount').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id; // tomar id del producto
+                    fetch('./api.php?action=sum', {
+                            method: 'post',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: `id=${id}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            loadData(); // recargar datos después de actualizar
+                            console.log(data)
+                        })
+                        .catch(e => console.log(e));
+                });
             });
         }
         // Evento click del boton guardar
 
         botonSend.addEventListener('click', function() {
-            const name = document.getElementById('name').value
+            const name = document.getElementById('name').value.toLowerCase();
             const amount = document.getElementById('amount').value
             const price = document.getElementById('price').value
             console.log(name)
-            if (name === '' && name.lenght <= 0) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Campo vacio',
-                    text: 'Completa todos los campos'
-                })
-            } else if (amount === '' && amount.lenght <= 0) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Campo vacio',
-                    text: 'Completa todos los campos'
-                })
-            } else if (price === '' && price.lenght <= 0) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Campo vacio',
-                    text: 'Completa todos los campos'
-                })
 
+            if (name == undefined || name == null || name == "") {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Campo vacio',
+                    text: 'Completa todos los campos'
+                })
+                return false;
+            } else if (amount == undefined || amount == null || amount == "") {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Campo vacio',
+                    text: 'Completa todos los campos'
+                })
+                return false;
+            } else if (price == undefined || price == null || price == "") {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Campo vacio',
+                    text: 'Completa todos los campos'
+                })
+                return false;
             } else {
                 fetch('./api.php?action=save', {
                         method: 'post',
@@ -131,15 +170,28 @@
                         body: `name=${name}&amount=${amount}&price=${price}`
                     })
                     .then(response => {
+                        if (!response.ok) {
+                            if (response.status === 409) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'El producto ya existe'
+                                })
+                            } else {
+                                throw new Error('Error en la solicitud');
+                            }
+                        }
                         response.json()
                     }).then(data => {
-                        loadData()
+                        loadData(); // recargar datos después de guardar
                         console.log(data)
                     }).catch(e => {
                         console.log(e)
                     })
             }
         })
+
+
 
         function showRegister() {
             document.getElementById('registers').classList.toggle('d-none');
