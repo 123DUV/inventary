@@ -109,6 +109,7 @@ switch ($action) {
                 break;
                 case "sumTotalPrice":
                     $sql = "SELECT  FROM datos";
+                    break;
     default:
         echo json_encode(["error" => "Acción no válida"]);
         exit;
