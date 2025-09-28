@@ -31,10 +31,10 @@
 
         </div>
         <div class="row d-none mt-2" id="registers">
-            <div class="col-12 col-md-12 rounded mt-2 mb-2 justify-content-center align-items-center d-flex flex-column" style="box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;">
+            <div class="col-12 col-md-12 rounded mt-2 mb-2 pt-2 justify-content-center align-items-center d-flex flex-column" style="box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;">
                 <input class="form-control mt-1" type="text" name="name" id="name" value placeholder="Nombre producto" />
                 <input class="form-control mt-1" type="text" name="amount" id="amount" value placeholder="Cantidad" />
-                <input class="form-control mt-1" type="text" name="price" id="price" value placeholder="Precio" />
+                <input class="form-control mt-1" type="text" name="price" id="price" value placeholder="Precio c/u" />
                 <button type="button" id="send" class="btn btn-success mt-3 w-50 mb-2">Agregar</button>
 
             </div>
@@ -49,6 +49,7 @@
                             <th>Cantidad</th>
                             <th></th>
                             <th>Precio c/u</th>
+                            <th>Precio total</th>
                         </tr>
                     </thead>
                     <tbody id="info">
@@ -94,9 +95,10 @@
                 .catch(error => console.error('Error fetching data:', error));
         }
 
+
         function renderRows(rows) {
             if (rows.length === 0) {
-                document.getElementById('info').innerHTML = '<tr><td colspan="5">No hay datos disponibles</td></tr>';
+                document.getElementById('info').innerHTML = '<tr><td colspan="6">No hay datos disponibles</td></tr>';
                 return;
             }
 
@@ -110,6 +112,7 @@
                 <td>${item.amount}</td>
                 <td><button class="btn btn-success  mx-1 sumAmount" data-id="${item.id}">+</button></td>
                 <td>${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(item.price)}</td>
+                <td>${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(item.price * item.amount)}</td>
                 `;
                 info.appendChild(row);
             });
