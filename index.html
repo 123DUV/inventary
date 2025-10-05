@@ -1,3 +1,4 @@
+
 <!DOCTYPE html >
 <html>
 
@@ -52,6 +53,7 @@
                             <th>-</th>
                             <th>Precio c/u</th>
                             <th>Precio total</th>
+                            <th><i class="bi bi-trash"></i></th>
                         </tr>
                     </thead>
                     <tbody id="info">
@@ -100,7 +102,7 @@
 
         function renderRows(rows) {
             if (rows.length === 0) {
-                document.getElementById('info').innerHTML = '<tr><td colspan="7">No hay datos disponibles</td></tr>';
+                document.getElementById('info').innerHTML = '<tr><td colspan="8">No hay datos disponibles</td></tr>';
                 return;
             }
 
@@ -116,6 +118,7 @@
                 <td><button class="btn btn-danger  mx-1 lessAmount" data-id="${item.id}">-</button></td>
                 <td>${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(item.price)}</td>
                 <td>${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(item.totalPrice)}</td>
+                <td><button class="btn btn-danger mx-1 deleteRow" data-id="${item.id}"><i class="bi bi-trash"></i></button></td>
                 `;
                 info.appendChild(row);
             });
@@ -123,6 +126,25 @@
                 btn.addEventListener('click', function() {
                     const id = this.dataset.id; // tomar id del producto
                     fetch('./api.php?action=less', {
+                            method: 'post',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: `id=${id}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            loadData(); // recargar datos después de actualizar
+                            console.log(data)
+                        })
+                        .catch(e => console.log(e));
+                });
+            });
+            //borrar fila
+            document.querySelectorAll('.deleteRow').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id; // tomar id del producto
+                    fetch('./api.php?action=deleteRow', {
                             method: 'post',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded'
