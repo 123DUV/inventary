@@ -40,7 +40,7 @@ switch ($action) {
     break;
 
   case 'save':
-    $name = $_POST['name'] ?? '';
+    $name = strtolower(trim($_POST['name'] ?? ''));
     $amount = $_POST['amount'] ?? 0;
     $price = $_POST['price'] ?? 0;
     $totalPrice = $_POST['totalPrice'] ?? 0;
@@ -56,7 +56,7 @@ switch ($action) {
     }
 
     foreach ($productos as $producto) {
-      if (strcasecmp($producto['name'], $name) === 0) {
+      if (strcasecmp(trim($producto['name']), $name) === 0) {
         http_response_code(409); // Conflict
         echo json_encode(["error" => "El producto ya existe"], JSON_UNESCAPED_UNICODE);
         exit;
