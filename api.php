@@ -152,7 +152,7 @@ switch ($action) {
       $name = $_POST["nameModal"];
       $amount =$_POST["amountModal"];
       $price = $_POST["unitPrice"];
-      $totalPrice =$_POST["totalPriceModal"];
+      $totalPrice = $_POST["totalPriceModal"];
       $promotion =$_POST["promotion"];
       
       $stmt = $conn->prepare("UPDATE datos SET name = ?, amount = ?, price = ?, totalPrice = ?, promotion = ? WHERE id = ?");
