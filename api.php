@@ -1,4 +1,6 @@
 <?php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 // Configurar cabeceras para JSON
 header("Content-Type: application/json; charset=UTF-8");
 
