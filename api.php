@@ -120,12 +120,60 @@ switch ($action) {
       echo json_encode(["error" => $stmt->error], JSON_UNESCAPED_UNICODE);
     }
     break;
+  case "getInfoById":
+    // Obtener el ID que llega por POST
+    $id = $_POST["id"] ?? 0;
+
+    // Validar que haya llegado un ID
+    if ($id == 0) {
+        echo json_encode(["error" => "ID no recibido o inválido"]);
+        break;
+    }
+
+    // Consulta a la base de datos
+    $sql = "SELECT * FROM datos WHERE id=$id";
+    $result = $conn->query($sql);
+
+    $productos = [];
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $productos[] = $row;
+        }
+    }
+
+    // Devolver el resultado como JSON
+    echo json_encode($productos, JSON_UNESCAPED_UNICODE);
+    break;
+    case "editInfo":
+      
+      $id = $_POST["idModalEdit"];
+      $name = $_POST["nameModal"];
+      $amount =$_POST["amountModal"];
+      $price = $_POST["unitPrice"];
+      $totalPrice =$_POST["totalPriceModal"];
+      $promotion =$_POST["promotion"];
+      
+      $stmt = $conn->prepare("UPDATE datos SET name = ?, amount = ?, price = ?, totalPrice = ?, promotion = ? WHERE id = ?");
+      $stmt->bind_param("siddsi", $name, $amount, $price, $totalPrice, $promotion, $id);
+      if($stmt->execute()){
+        if($stmt->affected_rows>0){
+          http_response_code(200);
+          echo json_encode(["success"=>true,
+          "id"=>$stmt->insert_id,"name"=>$name, "amount"=>$amount, "price"=>$price, "totalPrice"=>$totalPrice, "promotion"=>$promotion], JSON_UNESCAPED_UNICODE);
+        }
+      }else{
+        http_response_code(409);
+        echo json_encode(["error"=>$stmt->error], JSON_UNESCAPED_UNICODE);
+      }
+      
+      
+      break;
 
   default:
     echo json_encode(["error" => "Acción no válida"], JSON_UNESCAPED_UNICODE);
     exit;
-}
+  }
 
-// Cerrar conexión
-$conn->close();
-?>
+  // Cerrar conexión
+  $conn->close();
+  ?>

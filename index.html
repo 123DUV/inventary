@@ -17,8 +17,8 @@
 <!-- SweetAlert2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- alertify cdn, js-->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/default.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/default.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
 </head>
 
@@ -69,7 +69,62 @@ class="bi bi-search"></i></button>
 </div>
 
 </div>
+<!--modal info producto -->
+<div>
 
+<!-- Modal de información de producto -->
+<div class="modal fade" id="productoModal" tabindex="-1" aria-labelledby="productoModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+
+<div class="modal-header">
+<h5 class="modal-title" id="productoModalLabel">Información del Producto</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+</div>
+
+<div class="modal-body">
+<form id="modalFormEdit">
+<div class="mb-3">
+  <input type="hidden" id="idModalEdit" name="idModalEdit">
+<label for="name" class="form-label">Nombre</label>
+<input type="text" class="form-control" id="nameModal" name="nameModal" placeholder="Ej: Zapatos deportivos" disabled>
+</div>
+
+<div class="mb-3">
+<label for="quantity" class="form-label">Cantidad</label>
+<input type="number" name="amountModal" class="form-control" id="amountModal" placeholder="Ej: 10" disabled>
+</div>
+
+<div class="mb-3">
+<label for="unitPrice" class="form-label">Precio c/u</label>
+<input type="number" name="unitPrice"  class="form-control" id="unitPrice" placeholder="Ej: 50.00" disabled>
+</div>
+
+<div class="mb-3">
+<label for="totalPrice" class="form-label">Precio total</label>
+<input type="number" name="totalPriceModal" class="form-control" id="totalPriceModal" placeholder="Ej: 500.00" readonly disabled>
+</div>
+
+<div class="mb-3">
+<label for="promotion" class="form-label">Promoción</label>
+<input type="text" class="form-control" id="promotion" name="promotion" placeholder="Ej: 10% descuento" disabled>
+</div>
+<div class="mb-3">
+<button class="btn btn-success off" type="button" id="editModal"><i class="bi bi-pen"></i></button>
+</div>
+</form>
+</div>
+
+<div class="modal-footer">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+<button type="button" class="btn btn-success" id="saveEditModal">Guardar</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 <script type="text/javascript" charset="utf-8">
 //llenar select de precios
@@ -114,7 +169,7 @@ rows.forEach(item => {
 const row = document.createElement('tr');
 row.innerHTML = `
 <td>${fixEncoding(item.id)}</td>
-<td>${item.name}</td>
+<td onclick="getInfo(${item.id})">${item.name}</td>
 <td>${item.amount}</td>
 <td><button class="btn btn-success  mx-1 sumAmount" data-id="${item.id}">+</button></td>
 <td><button class="btn btn-danger  mx-1 lessAmount" data-id="${item.id}">-</button></td>
@@ -141,9 +196,9 @@ body: `id=${id}`
 .then(response => response.json())
 .then(data => {
 loadData(); // recargar datos después de actualizar
-console.log(data)
+
 })
-.catch(e => console.log(e));
+.catch(e => console.error(e));
 });
 });
 //borrar fila
@@ -160,9 +215,9 @@ body: `id=${id}`
 .then(response => response.json())
 .then(data => {
 loadData(); // recargar datos después de actualizar
-console.log(data)
+
 })
-.catch(e => console.log(e));
+.catch(e => console.error(e));
 });
 });
 document.querySelectorAll('.sumAmount').forEach(btn => {
@@ -178,9 +233,9 @@ body: `id=${id}`
 .then(response => response.json())
 .then(data => {
 loadData(); // recargar datos después de actualizar
-console.log(data)
+
 })
-.catch(e => console.log(e));
+.catch(e => console.error(e));
 });
 });
 }
@@ -233,8 +288,8 @@ text: 'El producto ya existe'
 } else {
 throw new Error('Error en la solicitud');
 }
-}else if(response.status === 200){
-  alertify.set('notifier', 'position', 'top-center')
+} else if (response.status === 200) {
+alertify.set('notifier', 'position', 'top-center')
 alertify.success("Agregado")
 }
 response.json()
@@ -244,16 +299,62 @@ document.getElementById("name").value = "";
 document.getElementById("amount").value = "";
 document.getElementById("price").value = "";
 // recargar datos después de guardar
-console.log(data)
+
 }).catch(e => {
-  alertify.set('notifier', 'position', 'top-center')
-  alertify.error("Error agregando")
-console.log(e)
+alertify.set('notifier', 'position', 'top-center')
+alertify.error("Error agregando")
+console.error(e)
 })
 }
 })
 
+function getInfo(id) {
 
+fetch('./api.php?action=getInfoById', {
+method: 'post',
+headers: {
+'Content-Type': 'application/x-www-form-urlencoded'
+},
+body: "id="+ encodeURIComponent(id)
+})
+.then(response => {
+if (!response.ok) {
+if (response.status === 409) {
+Swal.fire({
+icon: 'error',
+title: 'Error',
+text: 'Error trayendo información del producto'
+})
+} else {
+throw new Error('Error en la solicitud');
+}
+} else if (response.status === 200) {
+console.log("correcto obteniendo info para editar modal")
+}
+return response.json()
+})
+.then(data => {
+const producto = data[0];
+document.getElementById("idModalEdit").value = producto.id;
+document.getElementById("nameModal").value = producto.name;
+document.getElementById("amountModal").value = producto.amount;
+document.getElementById("unitPrice").value = producto.price;
+document.getElementById("totalPriceModal").value = producto.price * producto.amount;
+const modal = new
+bootstrap.Modal(document.getElementById("productoModal"));
+modal.show();
+
+
+})
+.catch (error => {
+console.error("Error al obtener los datos del producto:", error);
+Swal.fire({
+icon: "error",
+title: "error",
+text: `error trayendo los datos del producto ${error}`
+})
+})
+}
 
 function showRegister() {
 document.getElementById('registers').classList.toggle('d-none');
@@ -275,9 +376,94 @@ String(item.id).includes(q)
 );
 renderRows(filtered);
 });
-  function fixEncoding(str) {
-  return decodeURIComponent(escape(str));
+function fixEncoding(str) {
+return decodeURIComponent(escape(str));
 }
+
+document.getElementById("saveEditModal").addEventListener("click", function() {
+const formulario = document.getElementById("modalFormEdit");
+const form = new FormData(formulario);
+
+fetch('./api.php?action=editInfo', {
+method: 'post',
+body: form
+})
+.then(response => {
+if (!response.ok) {
+if (response.status === 409) {
+Swal.fire({
+icon: 'error',
+title: 'Error',
+text: 'Error trayendo información del producto'
+})
+} else {
+throw new Error('Error en la solicitud');
+}
+} else if (response.status === 200) {
+Swal.fire({
+icon: 'success',
+title: 'Correcto',
+text: 'Edición correcta'
+}).then((result)=>{
+  if(result.isConfirmed){
+      const modal = new
+bootstrap.Modal(document.getElementById("productoModal"));
+modal.show();
+window.location.reload()
+  }
+})
+}
+return response.json();
+})
+.then(data=>{
+  
+  console.log("info al guardar modal editado: ",data);
+
+})
+.catch(error=>{
+  console.error(error);
+})
+})
+
+//activar o desactivar inputs modal edit
+const btnEdit = document.getElementById("editModal");
+btnEdit.addEventListener("click", function() {
+if (btnEdit.classList.contains("off")) {
+btnEdit.classList.remove("off");
+
+document.getElementById("nameModal").removeAttribute("disabled");
+document.getElementById("amountModal").removeAttribute("disabled");
+document.getElementById("unitPrice").removeAttribute("disabled");
+
+document.getElementById("promotion").removeAttribute("disabled")
+} else {
+btnEdit.classList.add("off");
+document.getElementById("nameModal").setAttribute("disabled", true);
+document.getElementById("amountModal").setAttribute("disabled", true);
+document.getElementById("unitPrice").setAttribute("disabled", true);
+
+document.getElementById("promotion").setAttribute("disabled", true)
+}
+
+
+})
+const inputAmount = document.getElementById("amountModal");
+const inputPrice = document.getElementById("unitPrice");
+const totalPrice = document.getElementById("totalPriceModal");
+
+function calcularTotal(){
+  const cantidad = parseFloat(inputAmount.value) ||0;
+  
+  const unitPrice = parseFloat(inputPrice.value) ||0;
+  let sum = cantidad * unitPrice;
+  totalPrice.value = sum;
+}
+inputAmount.addEventListener("input", function(){
+  calcularTotal()
+})
+inputPrice.addEventListener("input", function(){
+  calcularTotal()
+})
 </script>
 </body>
 
