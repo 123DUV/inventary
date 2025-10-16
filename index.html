@@ -335,7 +335,7 @@ return response.json()
 })
 .then(data => {
 const producto = data[0];
-document.getElementById("idModalEdit").value = producto.id;
+document.getElementById("idModalEdit").value = id;
 document.getElementById("nameModal").value = producto.name;
 document.getElementById("amountModal").value = producto.amount;
 document.getElementById("unitPrice").value = producto.price;
