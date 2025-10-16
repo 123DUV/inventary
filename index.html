@@ -335,7 +335,7 @@ return response.json()
 })
 .then(data => {
 const producto = data[0];
-document.getElementById("idModalEdit").value = id;
+document.getElementById("idModalEdit").value = producto.id;
 document.getElementById("nameModal").value = producto.name;
 document.getElementById("amountModal").value = producto.amount;
 document.getElementById("unitPrice").value = producto.price;
@@ -390,6 +390,7 @@ body: form
 })
 .then(response => {
 if (!response.ok) {
+  throw new Error(`http: ${response.status}`);
 if (response.status === 409) {
 Swal.fire({
 icon: 'error',
@@ -399,6 +400,7 @@ text: 'Error trayendo información del producto'
 } else {
 throw new Error('Error en la solicitud');
 }
+
 } else if (response.status === 200) {
 Swal.fire({
 icon: 'success',
